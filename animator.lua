@@ -3,7 +3,7 @@
 local ContentProvider = game:GetService("ContentProvider")
 
 -- ThreadPool dependency: https://github.com/Someone-dQw4w9WgXcQ/Lua-ThreadPool
-local thread = require(game:GetService("ReplicatedStorage"):WaitForChild("ThreadPool"))
+local spawnWithReuse = require(game:GetService("ReplicatedStorage"):WaitForChild("ThreadPool"))
 
 local ANIMATION_CONFIG = {
 	["ClimbingAnimation"] = {
@@ -55,7 +55,7 @@ for name, info in ANIMATION_CONFIG do
 	animation.AnimationId = info.Id
 	animationObjects[name] = animation
 	
-	thread.spawn(ContentProvider.PreloadAsync, ContentProvider, {info.Id})
+	spawnWithReuse(ContentProvider.PreloadAsync, ContentProvider, {info.Id})
 end
 
 return function(rig: Instance, humanoid: Humanoid, animator: Animator)
