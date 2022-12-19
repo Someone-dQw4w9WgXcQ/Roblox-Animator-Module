@@ -54,19 +54,19 @@ for name, info in ANIMATION_CONFIG do
 	local animation = Instance.new("Animation")
 	animation.AnimationId = info.Id
 	animationObjects[name] = animation
-	
+
 	spawnWithReuse(ContentProvider.PreloadAsync, ContentProvider, {info.Id})
 end
 
 return function(rig: Instance, humanoid: Humanoid, animator: Animator)
 	local animationTracks = {}
-	
+
 	for name, info in ANIMATION_CONFIG do
 		local animationTrack = animator:LoadAnimation(animationObjects[name])
 		animationTrack.Priority = info.Priority
 		animationTrack.Name = name
 		animationTrack.Looped = info.Looped
-		
+
 		animationTracks[name] = animationTrack
 	end
 
@@ -105,6 +105,7 @@ return function(rig: Instance, humanoid: Humanoid, animator: Animator)
 	end)
 
 	humanoid.Climbing:Connect(function(speed)
+		play("ClimbingAnimation")
 		if speed == 0 then
 			adjustSpeed("ClimbingAnimation", 0)
 		else
@@ -128,32 +129,15 @@ return function(rig: Instance, humanoid: Humanoid, animator: Animator)
 		play("ToolAnimation")
 	end
 
-	local function stopOtherAnimations(except: string?)
-		--Stop all animations except the tool animation and the except parameter
-		for name, animationTrack in animationTracks do
-			if name == except or name == "ToolAnimation" then continue end
-			animationTrack:Stop(0.2)
-		end
-	end
-
 	humanoid.StateChanged:Connect(function(_oldState, newState)
-		if newState == Enum.HumanoidStateType.Climbing then
-			play("ClimbingAnimation")
-			stopOtherAnimations("ClimbingAnimation")
-		elseif newState == Enum.HumanoidStateType.Running and humanoid.MoveDirection ~= Vector3.zero then
-			play("RunningAnimation")
-			stopOtherAnimations("RunningAnimation")
-		elseif newState == Enum.HumanoidStateType.Freefall then
+		if newState == Enum.HumanoidStateType.Freefall then
 			play("JumpingAnimation")
-			stopOtherAnimations("JumpingAnimation")
-		elseif newState == Enum.HumanoidStateType.Swimming and humanoid.MoveDirection ~= Vector3.zero then
-			play("SwimmingAnimation")
-			stopOtherAnimations("SwimmingAnimation")
 		elseif newState == Enum.HumanoidStateType.Seated then
 			play("SitAnimation")
-			stopOtherAnimations("SitAnimation")
-		else
-			stopOtherAnimations()
+		end
+		for name, animationTrack in animationTracks do
+			if name == "ToolAnimation" then continue end
+			animationTrack:Stop(0.2)
 		end
 	end)
 end
