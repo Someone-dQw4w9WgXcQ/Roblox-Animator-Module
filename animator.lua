@@ -131,7 +131,7 @@ return function(rig: Instance, humanoid: Humanoid, animator: Animator)
 	local function stopOtherAnimations(except: string?)
 		--Stop all animations except the tool animation and the except parameter
 		for name, animationTrack in animationTracks do
-			if name == except then continue end
+			if name == except or name == "ToolAnimation" then continue end
 			animationTrack:Stop(0.2)
 		end
 	end
